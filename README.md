@@ -4,7 +4,7 @@
 
 Глоба Максим
 
-Правила Оформлення Програмного Коду на TypeScript за конвецією Google TypeScript Style Guide
+Правила оформлення програмного коду на TypeScript за конвецією Google TypeScript Style Guide
 
 Методи рефакторингу коду програмного забезпечення
 
