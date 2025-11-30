@@ -1,0 +1,306 @@
+﻿МІНІСТЕРСТВО ОСВІТИ І НАУКИ УКРАЇНИ
+ХАРКІВСЬКИЙ НАЦІОНАЛЬНИЙ УНІВЕРСИТЕТ РАДІОЕЛЕКТРОНІКИ
+
+ФАКУЛЬТЕТ КОМП’ЮТЕРНИХ НАУК
+КАТЕДРА ПРОГРАМНОЇ ІНЖЕНЕРІЇ
+
+
+ЗВІТ
+до практичного завдання №2 
+з дисципліни «Аналіз та рефакторинґ коду» на тему: 
+«Методи рефакторинґу коду програмного забезпечення»
+
+
+Виконав:							Перевірив:
+ст. гр. ПЗПІ-23-6					ст. викладач катедри ПІ
+Глоба Максим						Сокорчук Ігор Петрович
+
+
+
+
+
+
+
+
+
+
+Харків 2025
+1 ІСТОРІЯ ЗМІН
+№
+Дата
+Версія звіту
+Опис змін та виправлень
+1
+30.11.2025
+1
+Створено звіт
+
+
+
+2 ЗАВДАННЯ
+     Метою практичного заняття є опанування студентами ефективних підходів до вдосконалення програмного коду шляхом застосування методів рефакторинґу. Студент повинен навчитися проводити аналіз власного коду, ідентифікувати проблемні ділянки («запахи коду»), що ускладнюють його сприйняття та підтримку, а також практично застосовувати техніки покращення внутрішньої структури програми без зміни її зовнішньої поведінки.
+     У процесі виконання роботи студент обирає три методи рефакторинґу (спираючись на класичну працю Мартіна Фаулера «Refactoring: Improving the Design of Existing Code») та застосовує їх до фрагментів власного коду з попередніх навчальних проєктів (лабораторних або курсових робіт). Для кожного випадку необхідно чітко сформулювати проблему (наприклад, дублювання коду, надмірна складність, незрозуміла логіка), навести приклад коду «до» та «після» перетворення, а також обґрунтувати доцільність використаного методу.
+     Окремим етапом є створення презентації, у якій візуалізується процес рефакторинґу та демонструються його результати. Під час захисту студент має пояснити переваги отриманого коду (підвищення читабельності, спрощення розширення тощо) та відповісти на запитання щодо альтернативних шляхів вирішення проблеми. Результатом роботи є структурований звіт (PDF) та презентація.
+
+
+3 ОПИС ВИКОНАНОЇ РОБОТИ
+     3.1 Методи Рефакторинґу Коду Програмного Забезпечення
+     Визначено тему роботи — дослідження та практичне застосування методів рефакторинґу коду для покращення його внутрішньої структури. Вказано автора роботи (Глоба Максим Валерійович, група ПЗПІ-23-6). Робота спрямована на вивчення технік, що дозволяють модифікувати код без зміни його зовнішньої поведінки.
+     3.2 Вступ до Рефакторинґу Коду
+     Обґрунтовано теоретичну базу рефакторинґу. Визначено, що це процес зміни внутрішньої структури програмного забезпечення з метою покращення читабельності, спрощення підтримки та забезпечення масштабованості. Наголошено, що рефакторинґ є невід'ємною частиною життєвого циклу розробки, що дозволяє зменшити технічний борг та уникнути деградації архітектури системи.
+     3.3 Інструменти для Рефакторинґу
+     Проведено огляд сучасних інструментальних засобів автоматизації рефакторинґу. Розглянуто можливості інтегрованих середовищ розробки (IDE):
+- JetBrains IDE (WebStorm, IntelliJ IDEA): Визначено як "золотий стандарт" завдяки глибокому аналізу контексту та функціям Smart Rename та Safe Delete.
+- Visual Studio: Описано як стандарт для .NET розробки з можливостями для рефакторингу завдяки платформі Roslyn.
+- Eclipse: Відзначено як початківця автоматизованого рефакторинґу, особливо для Java-екосистеми.
+     3.4 Метод "Hide Method" (Приховання методу)
+     Розглянуто суть методу "Hide Method" (Приховання методу). Визначено проблему порушення інкапсуляції, коли метод, що використовується лише всередині класу, залишається публічним. Це створює зайвий інтерфейс і потенційні точки помилки при некоректному виклику з інших частин системи. Метою методу є обмеження доступу шляхом зміни модифікатора на приватний.
+     3.5 Метод Hide Method: Аналіз Коду До Рефакторинґу
+     Продемонстровано фрагмент реального коду контролера аутентифікації. Виявлено проблему: метод перевірки прав адміністратора є публічним, хоча викликається лише іншим методом цього ж класу. Це порушує принцип інкапсуляції.
+     
+1  public checkGlobalAdminAccess(role: UserRole): void {
+2    if (role === UserRole.GLOBAL_ADMIN) {
+3      throw new UnauthorizedException(
+4        AUTH_CONSTANTS.ERROR_MESSAGES.GLOBAL_ADMIN_NO_VERIFICATION,
+5      );
+6    }
+7  }
+     3.6 Приклад після рефакторинґу: Hide Method
+     Показано результат застосування рефакторинґу. Модифікатор доступу змінено на private. Це чітко вказує на внутрішнє призначення методу, робить клас більш самодостатнім та зменшує ризик неправильного використання методу зовнішніми компонентами.
+     
+1  private checkGlobalAdminAccess(role: UserRole): void {
+2    if (role === UserRole.GLOBAL_ADMIN) {
+3      throw new UnauthorizedException(
+4        AUTH_CONSTANTS.ERROR_MESSAGES.GLOBAL_ADMIN_NO_VERIFICATION,
+5      );
+6    }
+7  }
+     3.7 Метод "Replace Exception with Test" (Заміна винятку перевіркою)
+     Описано метод заміни обробки винятків на умовні перевірки. Пояснено, що винятки (try-catch) призначені для непередбачуваних ситуацій, а не для керування звичайним потоком виконання. Використання їх для логічних перевірок ускладнює код і може негативно впливати на продуктивність.
+     3.8 Приклад до рефакторинґу: Replace Exception with Test
+     Наведено приклад коду валідації перетину зон. Логіка перевірки загорнута в блок try-catch, де викидається та відловлюється виняток для звичайної логічної умови (знайдено перетин). Це робить код важчим для розуміння.
+     
+1  private validateNoZoneOverlap(
+2      targetZone: Zone,
+3      allZones: Zone[],
+4      coordinatesMap: CoordinatesMap,
+5  ): void {
+6      try {
+7          const targetCoords = coordinatesMap.get(targetZone.zone_id) as Rectangle;
+8  
+9          const zonesToCheck: Zone[] = allZones.filter((z: Zone): boolean => {
+10             if (z.zone_id === targetZone.zone_id) return false;
+11             if (targetZone.is_transition_between_floors) return true;
+12             if (z.is_transition_between_floors) return true;
+13             if (targetZone.floor && z.floor) {
+14                 return targetZone.floor.floor_id === z.floor.floor_id;
+15             }
+16             return false;
+17         });
+18 
+19         for (const otherZone of zonesToCheck) {
+20             const otherCoords = coordinatesMap.get(otherZone.zone_id) as Rectangle;
+21 
+22             const overlaps: boolean = this.zoneGeometryValidator.checkOverlap(
+23                 targetCoords,
+24                 otherCoords,
+25             );
+26 
+27             if (overlaps) {
+28                 throw new BadRequestException(
+29                     BUILDINGS_CONSTANTS.ERROR_MESSAGES.ZONE_OVERLAP_WITH_ZONE(
+30                         otherZone.title,
+31                     ),
+32                 );
+33             }
+34         }
+35     } catch (e) {
+36         if (e instanceof BadRequestException) throw e;
+37     }
+38 }
+     3.9 Приклад після рефакторинґу: Replace Exception with Test
+     Продемонстровано код після рефакторинґу. Блок try-catch видалено, замість нього використано просту умовну конструкцію if. Код став лінійним, чистішим, а відповідальність чітко розділена: умовні оператори обробляють очікувані сценарії.
+     
+1  private validateNoZoneOverlap(
+2      targetZone: Zone,
+3      allZones: Zone[],
+4      coordinatesMap: CoordinatesMap,
+5  ): void {
+6      const targetCoords = coordinatesMap.get(targetZone.zone_id);
+7      if (!targetCoords) return;
+8  
+9      const zonesToCheck = allZones.filter(z => {
+10         if (z.zone_id === targetZone.zone_id) return false;
+11         if (targetZone.is_transition_between_floors) return true;
+12         if (z.is_transition_between_floors) return true;
+13         if (targetZone.floor && z.floor) {
+14             return targetZone.floor.floor_id === z.floor.floor_id;
+15         }
+16         return false;
+17     });
+18 
+19     for (const otherZone of zonesToCheck) {
+20         const otherCoords = coordinatesMap.get(otherZone.zone_id);
+21         if (!otherCoords) continue;
+22 
+23         const overlaps = this.zoneGeometryValidator.checkOverlap(
+24             targetCoords,
+25             otherCoords,
+26         );
+27 
+28         if (overlaps) {
+29             throw new BadRequestException(
+30                 BUILDINGS_CONSTANTS.ERROR_MESSAGES.ZONE_OVERLAP_WITH_ZONE(
+31                     otherZone.title,
+32                 ),
+33             );
+34         }
+35     }
+36 }
+     3.10 Метод "Remove Parameter" (Видалення параметру)
+     Розглянуто метод видалення зайвого параметру. Зазначено, що параметри, які не використовуються в тілі методу, створюють інформаційний шум, ускладнюють сигнатуру та можуть вводити в оману розробників щодо залежностей функції.
+     3.11 Приклад до рефакторинґу: Remove Parameter
+     Проаналізовано метод markAllAsReadByAdmin. У сигнатурі присутній параметр organizationId, який жодним чином не використовується всередині функції (ні в умовах, ні в запитах до бази даних).
+     
+1  async markAllAsReadByAdmin(
+2      userId: number,
+3      organizationId: number,
+4  ): Promise<void> {
+5      const organizationIds: number[] = await this.getAdminOrganizationIds(userId);
+6  
+7      if (organizationIds.length === 0) {
+8          return;
+9      }
+10 
+11     const subQuery: string = this.notificationRepository
+12         .createQueryBuilder('n')
+13         .select('n.notification_id')
+14         .innerJoin('n.zone', 'zone')
+15         .innerJoin('zone.building', 'building')
+16         .where('building.organization_id IN (:...organizationIds)', {
+17             organizationIds,
+18         })
+19         .andWhere('n.is_read_by_org_admin = :isRead', { isRead: false })
+20         .getQuery();
+21 
+22     await this.notificationRepository
+23         .createQueryBuilder()
+24         .update(Notification)
+25         .set({ is_read_by_org_admin: true })
+26         .where(`notification_id IN (${subQuery})`)
+27         .setParameters({ organizationIds, isRead: false })
+28         .execute();
+29 }
+     3.12 Приклад після рефакторинґу: Remove Parameter
+     Виконано очищення сигнатури методу. Невикористовуваний параметр видалено. Це спростило інтерфейс функції, покращило читабельність та полегшило інтеграцію цього методу в інших частинах програми.
+     
+1  async markAllAsReadByAdmin(userId: number): Promise<void> {
+2      const organizationIds: number[] = await this.getAdminOrganizationIds(userId);
+3  
+4      if (organizationIds.length === 0) {
+5          return;
+6      }
+7  
+8      const subQuery: string = this.notificationRepository
+9          .createQueryBuilder('n')
+10         .select('n.notification_id')
+11         .innerJoin('n.zone', 'zone')
+12         .innerJoin('zone.building', 'building')
+13         .where('building.organization_id IN (:...organizationIds)', {
+14             organizationIds,
+15         })
+16         .andWhere('n.is_read_by_org_admin = :isRead', { isRead: false })
+17         .getQuery();
+18 
+19     await this.notificationRepository
+20         .createQueryBuilder()
+21         .update(Notification)
+22         .set({ is_read_by_org_admin: true })
+23         .where(`notification_id IN (${subQuery})`)
+24         .setParameters({ organizationIds, isRead: false })
+25         .execute();
+26 }
+     3.13 Висновки
+     Підсумовано результати роботи. Зазначено чотири ключові досягнення: підвищення якості коду через покращення структури, посилення інкапсуляції та безпеки, зменшення технічного боргу для полегшення майбутньої підтримки, а також оптимізація продуктивності шляхом усунення зайвих механізмів обробки винятків.
+     3.14 Використані Джерела
+     Наведено перелік ресурсів, що слугували теоретичною основою. Список включає фундаментальні каталоги (Refactoring.Guru, Martin Fowler), інструменти для автоматизації (SonarLint, ESLint) та офіційні гайдлайни зі стилю коду (Google TypeScript Style Guide).
+4 ВИСНОВКИ
+     У ході виконання практичного завдання було опрацьовано ключові методи рефакторинґу програмного коду, спрямовані на покращення внутрішньої структури програмного забезпечення без зміни його зовнішньої поведінки. Під час роботи було проаналізовано, як систематичне очищення коду впливає на його читабельність, зменшення технічного боргу та полегшення подальшої підтримки проекту.
+     Було отримано практичні навички виявлення "запахів коду" та їх усунення за допомогою конкретних технік. Зокрема, застосування методу "Hide Method" дозволило підвищити рівень інкапсуляції класів, захистивши внутрішню логіку від некоректного зовнішнього втручання. Використання "Replace Exception with Test" продемонструвало важливість розмежування обробки виняткових ситуацій та керування стандартним потоком виконання, що позитивно вплинуло на продуктивність та прозорість логіки. Метод "Remove Parameter" дозволив спростити сигнатури функцій, усунувши зайвий інформаційний шум та надлишкову зв'язність компонентів.
+     Також було розглянуто можливості сучасних середовищ розробки (JetBrains IDE, VS Code, Eclipse) щодо автоматизації процесу рефакторинґу. Було визначено, що використання вбудованих інструментів статичного аналізу та безпечної модифікації коду мінімізує ризик виникнення помилок при внесенні змін.
+     Таким чином, результати виконаної роботи доводять, що рефакторинґ не є опціональною дією, а виступає необхідною складовою професійної розробки. Регулярна оптимізація структури коду дозволяє створювати гнучкі, надійні та масштабовані системи, що суттєво підвищує ефективність роботи команди розробників у довгостроковій перспективі.
+5 ВИКОРИСТАНІ ДЖЕРЕЛА
+1. Refactoring.Guru (Каталог патернів). URL: https://refactoring.guru/uk/refactoring (дата звернення: 30.11.2025).
+2. Martin Fowler’s Refactoring Catalog. URL: https://refactoring.com/catalog/ (дата звернення: 30.11.2025).
+3. SourceMaking (Refactoring). URL: https://sourcemaking.com/refactoring (дата звернення: 30.11.2025).
+4. SonarLint (IDE Extension). URL: https://www.sonarsource.com/products/sonarlint/ (дата звернення: 30.11.2025).
+5. ESLint Rules (Code Quality). URL: https://eslint.org/docs/latest/rules/ (дата звернення: 30.11.2025).
+6. VS Code Refactoring. URL: https://code.visualstudio.com/docs/typescript/typescript-refactoring (дата звернення: 30.11.2025).
+7. Clean Code TypeScript (GitHub). URL: https://github.com/labs42io/clean-code-typescript (дата звернення: 30.11.2025).
+8. Google TypeScript Style Guide. URL: https://google.github.io/styleguide/tsguide.html (дата звернення: 30.11.2025).
+9. The "smells" of bad code. URL: https://dev.to/codemouse92/the-smells-of-bad-code-1c9m (дата звернення: 30.11.2025).
+
+
+ДОДАТОК А
+Відеозапис
+     Відеозапис доповіді: https://youtu.be/w8ZIrfNbz2c
+     
+Хронологічний опис відеозапису:
+     0:00 Титульна сторінка
+     0:16 Вступ до рефакторинґу коду
+     0:41 Інструменти для рефакторинґу
+     1:27 Метод "Hide Method" (Приховання методу)
+     2:50 Метод "Replace Exception with Test" (Заміна винятку перевіркою)
+     4:46 Метод "Remove Parameter" (Видалення параметру)
+     6:06 Висновки
+     6:45 Корисні Джерела та Подальше Вивчення
+
+
+ДОДАТОК Б
+Слайди презентації
+
+Рисунок Б.1 —Титульна сторінка презентації
+
+
+Рисунок Б.2 — Вступ до рефакторинґу коду
+
+Рисунок Б.3 — Інструменти для рефакторинґу
+
+
+Рисунок Б.4 — Метод "Hide Method" (Приховання методу)
+
+
+Рисунок Б.5 — Приклад до рефакторинґу: Hide Method
+
+
+Рисунок Б.6 — Приклад після рефакторинґу: Hide Method
+
+
+Рисунок Б.7 — Метод "Replace Exception with Test" (Заміна винятку перевіркою)
+
+
+Рисунок Б.8 — Приклад до рефакторинґу: Replace Exception with Test
+
+
+Рисунок Б.9 — Приклад після рефакторинґу: Replace Exception with Test
+
+
+Рисунок Б.10 — Метод "Remove Parameter" (Видалення параметру)
+
+
+Рисунок Б.11 — Приклад до рефакторинґу: Remove Parameter
+
+
+Рисунок Б.12 — Приклад після рефакторинґу: Remove Parameter
+
+
+Рисунок Б.13 — Висновки
+
+
+Рисунок Б.14 — Корисні Джерела та Подальше Вивчення
+
+
+
+2
+
+
